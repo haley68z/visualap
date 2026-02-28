@@ -6,7 +6,7 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local pGui = player:WaitForChild("PlayerGui")
 
--- Variables de données
+-- Données
 local currentRobux = 430254 
 local itemPrice = 7499
 local canClick = false
@@ -18,7 +18,6 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.Enabled = false
 ScreenGui.Parent = pGui
 
--- Fonction pour formater les nombres
 local function formatNumber(n)
 	return tostring(n):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
 end
@@ -65,7 +64,6 @@ Close1.TextColor3 = Color3.fromRGB(255, 255, 255)
 Close1.TextSize = 22
 Close1.Parent = BuyFrame
 
--- Contenu Item
 local ItemIcon = Instance.new("TextLabel")
 ItemIcon.Size = UDim2.new(0, 80, 0, 80)
 ItemIcon.Position = UDim2.new(0, 20, 0, 70)
@@ -186,22 +184,18 @@ OkBtn.Parent = SuccessFrame
 Instance.new("UICorner", OkBtn).CornerRadius = UDim.new(0, 8)
 
 -----------------------------------------
--- NOTIFICATION TEXT (La barre verte)
+-- NOTIFICATION VERTE (Sans contour)
 -----------------------------------------
 local GiftNotify = Instance.new("TextLabel")
-GiftNotify.Size = UDim2.new(0, 400, 0, 30)
-GiftNotify.Position = UDim2.new(0.5, -200, 1, -160) -- Positionné au dessus de l'inventaire
+GiftNotify.Size = UDim2.new(0, 500, 0, 30)
+GiftNotify.Position = UDim2.new(0.5, -250, 1, -125) 
 GiftNotify.BackgroundTransparency = 1
 GiftNotify.Text = "You gifted Admin Commands to someone!"
-GiftNotify.TextColor3 = Color3.fromRGB(150, 255, 150) -- Vert clair
-GiftNotify.TextSize = 18
+GiftNotify.TextColor3 = Color3.fromRGB(150, 255, 150) -- Vert pur
+GiftNotify.TextSize = 19
 GiftNotify.Font = Enum.Font.GothamBold
 GiftNotify.Visible = false
 GiftNotify.Parent = ScreenGui
-
-local UIStrokeNotify = Instance.new("UIStroke", GiftNotify)
-UIStrokeNotify.Thickness = 2
-UIStrokeNotify.Color = Color3.fromRGB(0, 50, 0) -- Contour vert foncé
 
 -----------------------------------------
 -- LOGIQUE
@@ -231,13 +225,14 @@ end
 
 BuyBtn.MouseButton1Click:Connect(function()
 	if canClick then
+		-- Déduction
 		currentRobux = currentRobux - itemPrice
 		RobuxDisplay.Text = "R$ " .. formatNumber(currentRobux)
 		
 		BuyFrame.Visible = false
 		SuccessFrame.Visible = true
 		
-		-- Affichage notification verte
+		-- Notification Verte simple
 		GiftNotify.Visible = true
 		task.delay(5, function()
 			GiftNotify.Visible = false

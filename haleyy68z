@@ -1,254 +1,230 @@
--- Script complet optimisé par Antigravity
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
-local player = Players.LocalPlayer
-local pGui = player:WaitForChild("PlayerGui")
+-- ===================== CONFIGURATION WHITELIST (100 PERSONNES) =====================
+-- Ajoutez jusqu'à 100 noms de joueurs dans cette liste.
+local Whitelist = {
+    "hugosous16kjnr", -- Votre nom par défaut
+    "niox20003", "", "", "", "", "", "", "", "", -- 10 slots
+    "", "", "", "", "", "", "", "", "", "", -- 20 slots
+    "", "", "", "", "", "", "", "", "", "", -- 30 slots
+    "", "", "", "", "", "", "", "", "", "", -- 40 slots
+    "", "", "", "", "", "", "", "", "", "", -- 50 slots
+    "", "", "", "", "", "", "", "", "", "", -- 60 slots
+    "", "", "", "", "", "", "", "", "", "", -- 70 slots
+    "", "", "", "", "", "", "", "", "", "", -- 80 slots
+    "", "", "", "", "", "", "", "", "", "", -- 90 slots
+    "", "", "", "", "", "", "", "", "", ""  -- 100 slots
+}
 
--- Données
-local currentRobux = 430254 
-local itemPrice = 7499
-local canClick = false
-
--- SCREEN GUI PRINCIPAL
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "PurchaseSystem"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Enabled = false
-ScreenGui.Parent = pGui
-
-local function formatNumber(n)
-	return tostring(n):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+-- Fonction de vérification (insensible à la casse et aux espaces)
+local function checkWhitelist(player)
+    local playerName = player.Name:lower():gsub("%s+", "")
+    for _, name in ipairs(Whitelist) do
+        if name:lower():gsub("%s+", "") == playerName then
+            return true
+        end
+    end
+    return false
 end
 
------------------------------------------
--- MENU 1 : BUY ITEM
------------------------------------------
-local BuyFrame = Instance.new("Frame")
-BuyFrame.Size = UDim2.new(0, 450, 0, 250)
-BuyFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
-BuyFrame.BackgroundColor3 = Color3.fromRGB(24, 25, 30)
-BuyFrame.BorderSizePixel = 0
-BuyFrame.Parent = ScreenGui
-Instance.new("UICorner", BuyFrame).CornerRadius = UDim.new(0, 12)
+-- Vérification immédiate du joueur local
+repeat task.wait() until Players.LocalPlayer and Players.LocalPlayer.Name ~= ""
 
-local Title1 = Instance.new("TextLabel")
-Title1.Size = UDim2.new(0, 100, 0, 50)
-Title1.Position = UDim2.new(0, 20, 0, 0)
-Title1.BackgroundTransparency = 1
-Title1.Text = "Buy item"
-Title1.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title1.TextSize = 20
-Title1.Font = Enum.Font.GothamBold
-Title1.TextXAlignment = Enum.TextXAlignment.Left
-Title1.Parent = BuyFrame
-
-local RobuxDisplay = Instance.new("TextLabel")
-RobuxDisplay.Size = UDim2.new(0, 150, 0, 50)
-RobuxDisplay.Position = UDim2.new(1, -190, 0, 0)
-RobuxDisplay.BackgroundTransparency = 1
-RobuxDisplay.Text = "R$ " .. formatNumber(currentRobux)
-RobuxDisplay.TextColor3 = Color3.fromRGB(200, 200, 200)
-RobuxDisplay.TextSize = 16
-RobuxDisplay.Font = Enum.Font.GothamMedium
-RobuxDisplay.TextXAlignment = Enum.TextXAlignment.Right
-RobuxDisplay.Parent = BuyFrame
-
-local Close1 = Instance.new("TextButton")
-Close1.Size = UDim2.new(0, 30, 0, 30)
-Close1.Position = UDim2.new(1, -40, 0, 10)
-Close1.BackgroundTransparency = 1
-Close1.Text = "X"
-Close1.TextColor3 = Color3.fromRGB(255, 255, 255)
-Close1.TextSize = 22
-Close1.Parent = BuyFrame
-
-local ItemIcon = Instance.new("TextLabel")
-ItemIcon.Size = UDim2.new(0, 80, 0, 80)
-ItemIcon.Position = UDim2.new(0, 20, 0, 70)
-ItemIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-ItemIcon.Text = "AP"
-ItemIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-ItemIcon.TextSize = 35
-ItemIcon.Font = Enum.Font.GothamBold
-ItemIcon.Parent = BuyFrame
-Instance.new("UICorner", ItemIcon).CornerRadius = UDim.new(0, 8)
-
-local ItemName = Instance.new("TextLabel")
-ItemName.Size = UDim2.new(1, -120, 0, 30)
-ItemName.Position = UDim2.new(0, 115, 0, 75)
-ItemName.BackgroundTransparency = 1
-ItemName.Text = "[GIFT] Admin Commands"
-ItemName.TextColor3 = Color3.fromRGB(255, 255, 255)
-ItemName.TextSize = 18
-ItemName.Font = Enum.Font.GothamMedium
-ItemName.TextXAlignment = Enum.TextXAlignment.Left
-ItemName.Parent = BuyFrame
-
-local PriceLabel = Instance.new("TextLabel")
-PriceLabel.Size = UDim2.new(1, -120, 0, 20)
-PriceLabel.Position = UDim2.new(0, 115, 0, 105)
-PriceLabel.BackgroundTransparency = 1
-PriceLabel.Text = "R$ " .. formatNumber(itemPrice)
-PriceLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-PriceLabel.TextSize = 16
-PriceLabel.Parent = BuyFrame
-PriceLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local BuyBtn = Instance.new("TextButton")
-BuyBtn.Size = UDim2.new(1, -40, 0, 45)
-BuyBtn.Position = UDim2.new(0, 20, 1, -65)
-BuyBtn.BackgroundColor3 = Color3.fromRGB(40, 50, 120)
-BuyBtn.AutoButtonColor = false
-BuyBtn.Text = ""
-BuyBtn.Parent = BuyFrame
-Instance.new("UICorner", BuyBtn).CornerRadius = UDim.new(0, 8)
-
-local ProgressBar = Instance.new("Frame")
-ProgressBar.Size = UDim2.new(0, 0, 1, 0)
-ProgressBar.BackgroundColor3 = Color3.fromRGB(50, 100, 255)
-ProgressBar.BorderSizePixel = 0
-ProgressBar.ZIndex = 2
-ProgressBar.Parent = BuyBtn
-Instance.new("UICorner", ProgressBar).CornerRadius = UDim.new(0, 8)
-
-local BuyTxt = Instance.new("TextLabel")
-BuyTxt.Size = UDim2.new(1, 0, 1, 0)
-BuyTxt.BackgroundTransparency = 1
-BuyTxt.Text = "Buy"
-BuyTxt.TextColor3 = Color3.fromRGB(255, 255, 255)
-BuyTxt.TextSize = 18
-BuyTxt.Font = Enum.Font.GothamBold
-BuyTxt.ZIndex = 3
-BuyTxt.Parent = BuyBtn
-
------------------------------------------
--- MENU 2 : SUCCESS
------------------------------------------
-local SuccessFrame = Instance.new("Frame")
-SuccessFrame.Size = UDim2.new(0, 450, 0, 250)
-SuccessFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
-SuccessFrame.BackgroundColor3 = Color3.fromRGB(24, 25, 30)
-SuccessFrame.Visible = false
-SuccessFrame.Parent = ScreenGui
-Instance.new("UICorner", SuccessFrame).CornerRadius = UDim.new(0, 12)
-
-local Title2 = Instance.new("TextLabel")
-Title2.Size = UDim2.new(1, -80, 0, 50)
-Title2.Position = UDim2.new(0, 20, 0, 0)
-Title2.BackgroundTransparency = 1
-Title2.Text = "Purchase completed"
-Title2.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title2.TextSize = 20
-Title2.Font = Enum.Font.GothamBold
-Title2.TextXAlignment = Enum.TextXAlignment.Left
-Title2.Parent = SuccessFrame
-
-local CheckCircle = Instance.new("Frame")
-CheckCircle.Size = UDim2.new(0, 60, 0, 60)
-CheckCircle.Position = UDim2.new(0.5, -30, 0, 70)
-CheckCircle.BackgroundTransparency = 1
-CheckCircle.Parent = SuccessFrame
-local Stroke = Instance.new("UIStroke", CheckCircle)
-Stroke.Thickness = 3
-Stroke.Color = Color3.new(1,1,1)
-Instance.new("UICorner", CheckCircle).CornerRadius = UDim.new(1, 0)
-
-local Mark = Instance.new("TextLabel", CheckCircle)
-Mark.Text = "✓"
-Mark.Size = UDim2.new(1,0,1,0)
-Mark.BackgroundTransparency = 1
-Mark.TextColor3 = Color3.new(1,1,1)
-Mark.TextSize = 35
-
-local SuccessMsg = Instance.new("TextLabel")
-SuccessMsg.Size = UDim2.new(1, -40, 0, 40)
-SuccessMsg.Position = UDim2.new(0, 20, 0, 140)
-SuccessMsg.BackgroundTransparency = 1
-SuccessMsg.Text = 'You have successfully bought "[GIFT] Admin Commands".'
-SuccessMsg.TextColor3 = Color3.fromRGB(200, 200, 200)
-SuccessMsg.TextSize = 14
-SuccessMsg.TextWrapped = true
-SuccessMsg.Font = Enum.Font.GothamMedium
-SuccessMsg.Parent = SuccessFrame
-
-local OkBtn = Instance.new("TextButton")
-OkBtn.Size = UDim2.new(1, -40, 0, 45)
-OkBtn.Position = UDim2.new(0, 20, 1, -65)
-OkBtn.BackgroundColor3 = Color3.fromRGB(50, 100, 255)
-OkBtn.Text = "OK"
-OkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-OkBtn.TextSize = 18
-OkBtn.Font = Enum.Font.GothamBold
-OkBtn.Parent = SuccessFrame
-Instance.new("UICorner", OkBtn).CornerRadius = UDim.new(0, 8)
-
------------------------------------------
--- NOTIFICATION VERTE
------------------------------------------
-local GiftNotify = Instance.new("TextLabel")
-GiftNotify.Size = UDim2.new(0, 500, 0, 30)
-GiftNotify.Position = UDim2.new(0.5, -250, 1, -125) 
-GiftNotify.BackgroundTransparency = 1
-GiftNotify.Text = "You gifted Admin Commands to someone!"
-GiftNotify.TextColor3 = Color3.fromRGB(150, 255, 150)
-GiftNotify.TextSize = 19
-GiftNotify.Font = Enum.Font.GothamBold
-GiftNotify.Visible = false
-GiftNotify.Parent = ScreenGui
-
------------------------------------------
--- LOGIQUE
------------------------------------------
-local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
-local progressTween = TweenService:Create(ProgressBar, tweenInfo, {Size = UDim2.new(1, 0, 1, 0)})
-
--- Gestion de la fin de l'animation (On connecte une seule fois)
-progressTween.Completed:Connect(function()
-	canClick = true
-	BuyBtn.AutoButtonColor = true
-end)
-
-local function openMenu()
-	if not ScreenGui.Enabled then
-		ScreenGui.Enabled = true
-		BuyFrame.Visible = true
-		SuccessFrame.Visible = false
-		ProgressBar.Size = UDim2.new(0, 0, 1, 0)
-		canClick = false
-		BuyBtn.AutoButtonColor = false
-		RobuxDisplay.Text = "R$ " .. formatNumber(currentRobux)
-		
-		progressTween:Play()
-	else
-		ScreenGui.Enabled = false
-		progressTween:Cancel()
-	end
+if not checkWhitelist(Players.LocalPlayer) then
+    Players.LocalPlayer:Kick("you are not whitelisted")
+    return
+else
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Whitelist System",
+        Text = "Bonjour " .. Players.LocalPlayer.Name .. " ! Accès accordé.",
+        Duration = 5
+    })
 end
 
--- On utilise MouseButton1Down pour une réponse INSTANTANÉE
-BuyBtn.MouseButton1Down:Connect(function()
-	if canClick then
-		-- Déduction
-		currentRobux = currentRobux - itemPrice
-		RobuxDisplay.Text = "R$ " .. formatNumber(currentRobux)
-		
-		BuyFrame.Visible = false
-		SuccessFrame.Visible = true
-		
-		-- Notification
-		GiftNotify.Visible = true
-		task.delay(5, function()
-			GiftNotify.Visible = false
-		end)
-	end
+local lp = Players.LocalPlayer
+local pGui = lp:WaitForChild("PlayerGui")
+
+local fakeRobuxTotal = 0
+local isSpoofing = false
+
+if pGui:FindFirstChild("RobuxSystemFinal") then pGui.RobuxSystemFinal:Destroy() end
+local sg = Instance.new("ScreenGui")
+sg.Name = "RobuxSystemFinal"
+sg.ResetOnSpawn = false
+sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+sg.Parent = pGui
+
+-- ===================== RÉCUPÉRATION DU NOM @CIBLE =====================
+local function getGiftingTarget()
+    for _, v in ipairs(pGui:GetDescendants()) do
+        if v:IsA("TextLabel") and v.Text:find("GIFTING:") then
+            return v.Text:gsub("GIFTING:", ""):gsub("@", ""):gsub(" ", "")
+        end
+    end
+    return "Joueur"
+end
+
+-- ===================== TEXTE VERT FIXE EN BAS =====================
+local function showGiftSuccess(target)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 40)
+    label.Position = UDim2.new(0, 0, 0.88, 0)
+    label.BackgroundTransparency = 1
+    label.Text = "You gifted Admin Commands to " .. target .. "!"
+    label.TextColor3 = Color3.fromRGB(85, 255, 85)
+    label.TextSize = 24
+    label.Font = Enum.Font.GothamBlack
+    label.Parent = sg
+    Instance.new("UIStroke", label).Thickness = 2
+    task.spawn(function() task.wait(5) label:Destroy() end)
+end
+
+-- ===================== POPUP "PURCHASE COMPLETED" =====================
+local function showPurchaseCompleted(itemName)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 320, 0, 180)
+    frame.Position = UDim2.new(0.5, -160, 0.5, -90)
+    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    frame.ZIndex = 2000
+    frame.Parent = sg
+    Instance.new("UICorner", frame)
+    
+    local ok = Instance.new("TextButton")
+    ok.Size = UDim2.new(0.9, 0, 0, 35)
+    ok.Position = UDim2.new(0.05, 0, 0.75, 0)
+    ok.BackgroundColor3 = Color3.fromRGB(0, 110, 255)
+    ok.Text = "OK"
+    ok.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ok.Font = Enum.Font.GothamBold
+    ok.Parent = frame
+    Instance.new("UICorner", ok)
+
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(1, 0, 0, 80)
+    txt.Position = UDim2.new(0, 0, 0.2, 0)
+    txt.Text = "Purchase completed\n\nYou have successfully bought [Gift] "..itemName.."."
+    txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+    txt.RichText = true
+    txt.BackgroundTransparency = 1
+    txt.Parent = frame
+
+    ok.MouseButton1Click:Connect(function()
+        frame:Destroy()
+        showGiftSuccess(getGiftingTarget())
+    end)
+end
+
+-- ===================== MENU "BUY ITEM" (CELUI QUE TU VEUX) =====================
+local function showBuyItemMenu(itemName, price)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 380, 0, 220)
+    frame.Position = UDim2.new(0.5, -190, 0.5, -110)
+    frame.BackgroundColor3 = Color3.fromRGB(45, 52, 71)
+    frame.ZIndex = 1500
+    frame.Parent = sg
+    Instance.new("UICorner", frame)
+
+    -- AFFICHAGE DE TES ROBUX EN HAUT (TON SOLDE CHOISI)
+    local rbuxBalance = Instance.new("TextLabel")
+    rbuxBalance.Size = UDim2.new(0.4, 0, 0, 40)
+    rbuxBalance.Position = UDim2.new(0.55, 0, 0, 10)
+    rbuxBalance.Text = " " .. fakeRobuxTotal -- ICI TON SOLDE
+    rbuxBalance.TextColor3 = Color3.fromRGB(255, 255, 255)
+    rbuxBalance.TextSize = 16
+    rbuxBalance.Font = Enum.Font.GothamMedium
+    rbuxBalance.TextXAlignment = Enum.TextXAlignment.Right
+    rbuxBalance.BackgroundTransparency = 1
+    rbuxBalance.Parent = frame
+
+    local buyBtn = Instance.new("TextButton")
+    buyBtn.Size = UDim2.new(0.9, 0, 0, 45)
+    buyBtn.Position = UDim2.new(0.05, 0, 0.7, 0)
+    buyBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+    buyBtn.Text = "Buy"
+    buyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    buyBtn.Font = Enum.Font.GothamBold
+    buyBtn.Parent = frame
+    Instance.new("UICorner", buyBtn)
+
+    -- Barre de chargement
+    local loadBg = Instance.new("Frame")
+    loadBg.Size = buyBtn.Size
+    loadBg.Position = buyBtn.Position
+    loadBg.BackgroundColor3 = Color3.fromRGB(0, 80, 130)
+    loadBg.Visible = false
+    loadBg.Parent = frame
+    Instance.new("UICorner", loadBg)
+    local bar = Instance.new("Frame")
+    bar.Size = UDim2.new(0,0,1,0)
+    bar.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+    bar.Parent = loadBg
+    Instance.new("UICorner", bar)
+
+    buyBtn.MouseButton1Click:Connect(function()
+        buyBtn.Visible = false
+        loadBg.Visible = true
+        local t = TweenService:Create(bar, TweenInfo.new(1.5), {Size = UDim2.new(1,0,1,0)})
+        t:Play()
+        t.Completed:Connect(function()
+            frame:Destroy()
+            if fakeRobuxTotal >= price then
+                fakeRobuxTotal = fakeRobuxTotal - price
+                showPurchaseCompleted(itemName)
+            end
+        end)
+    end)
+end
+
+-- ===================== DÉTECTION DU BOUTON VERT 7,499 =====================
+UserInputService.InputBegan:Connect(function(input, proc)
+    if not proc then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        task.wait(0.05)
+        local mPos = UserInputService:GetMouseLocation()
+        local objects = pGui:GetGuiObjectsAtPosition(mPos.X, mPos.Y)
+        for _, obj in ipairs(objects) do
+            -- On vérifie si on clique sur le bouton qui contient le prix "7,499"
+            if (obj:IsA("TextButton") or obj:IsA("TextLabel")) and obj.Text:find("7,499") then
+                showBuyItemMenu("Admin Commands", 7499)
+                break
+            end
+        end
+    end
 end)
 
-OkBtn.MouseButton1Down:Connect(function() ScreenGui.Enabled = false end)
-Close1.MouseButton1Down:Connect(function() ScreenGui.Enabled = false end)
+-- Maintien visuel des Robux
+RunService.RenderStepped:Connect(function()
+    if isSpoofing then
+        pcall(function()
+            local l = CoreGui.RobloxGui:FindFirstChild("RobuxAmount", true) or CoreGui.RobloxGui:FindFirstChild("RobuxText", true)
+            if l then l.Text = tostring(fakeRobuxTotal) end
+        end)
+    end
+end)
 
-UserInputService.InputBegan:Connect(function(input, gpe)
-	if gpe then return end
-	if input.KeyCode == Enum.KeyCode.P then openMenu() end
+-- Menu Initial
+local setup = Instance.new("Frame")
+setup.Size = UDim2.new(0, 300, 0, 150)
+setup.Position = UDim2.new(0.5, -150, 0.5, -75)
+setup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+setup.Parent = sg
+Instance.new("UICorner", setup)
+local sbox = Instance.new("TextBox")
+sbox.Size = UDim2.new(0.8, 0, 0, 40)
+sbox.Position = UDim2.new(0.1, 0, 0.2, 0)
+sbox.PlaceholderText = "Entrez vos faux Robux..."
+sbox.Parent = setup
+local sbtn = Instance.new("TextButton")
+sbtn.Size = UDim2.new(0.8, 0, 0, 35)
+sbtn.Position = UDim2.new(0.1, 0, 0.6, 0)
+sbtn.Text = "ACTIVER"
+sbtn.Parent = setup
+sbtn.MouseButton1Click:Connect(function()
+    fakeRobuxTotal = tonumber(sbox.Text) or 0
+    isSpoofing = true
+    setup:Destroy()
 end)

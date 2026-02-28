@@ -1,230 +1,55 @@
 local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
 
--- ===================== CONFIGURATION WHITELIST (100 PERSONNES) =====================
--- Ajoutez jusqu'à 100 noms de joueurs dans cette liste.
+-- =====================================================
+-- CONFIGURATION DE LA WHITELIST (100 PLACES)
+-- Ajoutez les noms des joueurs autorisés ci-dessous.
+-- Le système ignore les majuscules et les espaces.
+-- =====================================================
 local Whitelist = {
-    "hugosous16kjnr", -- Votre nom par défaut
-    "niox20003", "Hugosousbdv", "", "", "", "", "", "", "", -- 10 slots
-    "", "", "", "", "", "", "", "", "", "", -- 20 slots
-    "", "", "", "", "", "", "", "", "", "", -- 30 slots
-    "", "", "", "", "", "", "", "", "", "", -- 40 slots
-    "", "", "", "", "", "", "", "", "", "", -- 50 slots
-    "", "", "", "", "", "", "", "", "", "", -- 60 slots
-    "", "", "", "", "", "", "", "", "", "", -- 70 slots
-    "", "", "", "", "", "", "", "", "", "", -- 80 slots
-    "", "", "", "", "", "", "", "", "", "", -- 90 slots
-    "", "", "", "", "", "", "", "", "", ""  -- 100 slots
+    "hugosous16kjnr", -- Ton nom par défaut
+    "", "", "", "", "", "", "", "", "", -- 10
+    "", "", "", "", "", "", "", "", "", "", -- 20
+    "", "", "", "", "", "", "", "", "", "", -- 30
+    "", "", "", "", "", "", "", "", "", "", -- 40
+    "", "", "", "", "", "", "", "", "", "", -- 50
+    "", "", "", "", "", "", "", "", "", "", -- 60
+    "", "", "", "", "", "", "", "", "", "", -- 70
+    "", "", "", "", "", "", "", "", "", "", -- 80
+    "", "", "", "", "", "", "", "", "", "", -- 90
+    "", "", "", "", "", "", "", "", "", ""  -- 100
 }
 
--- Fonction de vérification (insensible à la casse et aux espaces)
-local function checkWhitelist(player)
-    local playerName = player.Name:lower():gsub("%s+", "")
+-- =====================================================
+-- LOGIQUE DE VÉRIFICATION
+-- =====================================================
+local function isWhitelisted(targetPlayer)
+    local nameToTarget = targetPlayer.Name:lower():gsub("%s+", "")
     for _, name in ipairs(Whitelist) do
-        if name:lower():gsub("%s+", "") == playerName then
+        if name:lower():gsub("%s+", "") == nameToTarget then
             return true
         end
     end
     return false
 end
 
--- Vérification immédiate du joueur local
-repeat task.wait() until Players.LocalPlayer and Players.LocalPlayer.Name ~= ""
+-- Attente du chargement complet du nom du joueur
+repeat task.wait() until player and player.Name ~= ""
 
-if not checkWhitelist(Players.LocalPlayer) then
-    Players.LocalPlayer:Kick("you are not whitelisted")
-    return
-else
+if isWhitelisted(player) then
+    -- ACCÈS ACCORDÉ
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "Whitelist System",
-        Text = "Bonjour " .. Players.LocalPlayer.Name .. " ! Accès accordé.",
+        Text = "Bonjour " .. player.Name .. " ! Accès autorisé.",
         Duration = 5
     })
-end
-
-local lp = Players.LocalPlayer
-local pGui = lp:WaitForChild("PlayerGui")
-
-local fakeRobuxTotal = 0
-local isSpoofing = false
-
-if pGui:FindFirstChild("RobuxSystemFinal") then pGui.RobuxSystemFinal:Destroy() end
-local sg = Instance.new("ScreenGui")
-sg.Name = "RobuxSystemFinal"
-sg.ResetOnSpawn = false
-sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-sg.Parent = pGui
-
--- ===================== RÉCUPÉRATION DU NOM @CIBLE =====================
-local function getGiftingTarget()
-    for _, v in ipairs(pGui:GetDescendants()) do
-        if v:IsA("TextLabel") and v.Text:find("GIFTING:") then
-            return v.Text:gsub("GIFTING:", ""):gsub("@", ""):gsub(" ", "")
-        end
-    end
-    return "Joueur"
-end
-
--- ===================== TEXTE VERT FIXE EN BAS =====================
-local function showGiftSuccess(target)
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 0, 40)
-    label.Position = UDim2.new(0, 0, 0.88, 0)
-    label.BackgroundTransparency = 1
-    label.Text = "You gifted Admin Commands to " .. target .. "!"
-    label.TextColor3 = Color3.fromRGB(85, 255, 85)
-    label.TextSize = 24
-    label.Font = Enum.Font.GothamBlack
-    label.Parent = sg
-    Instance.new("UIStroke", label).Thickness = 2
-    task.spawn(function() task.wait(5) label:Destroy() end)
-end
-
--- ===================== POPUP "PURCHASE COMPLETED" =====================
-local function showPurchaseCompleted(itemName)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 320, 0, 180)
-    frame.Position = UDim2.new(0.5, -160, 0.5, -90)
-    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    frame.ZIndex = 2000
-    frame.Parent = sg
-    Instance.new("UICorner", frame)
     
-    local ok = Instance.new("TextButton")
-    ok.Size = UDim2.new(0.9, 0, 0, 35)
-    ok.Position = UDim2.new(0.05, 0, 0.75, 0)
-    ok.BackgroundColor3 = Color3.fromRGB(0, 110, 255)
-    ok.Text = "OK"
-    ok.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ok.Font = Enum.Font.GothamBold
-    ok.Parent = frame
-    Instance.new("UICorner", ok)
-
-    local txt = Instance.new("TextLabel")
-    txt.Size = UDim2.new(1, 0, 0, 80)
-    txt.Position = UDim2.new(0, 0, 0.2, 0)
-    txt.Text = "Purchase completed\n\nYou have successfully bought [Gift] "..itemName.."."
-    txt.TextColor3 = Color3.fromRGB(255, 255, 255)
-    txt.RichText = true
-    txt.BackgroundTransparency = 1
-    txt.Parent = frame
-
-    ok.MouseButton1Click:Connect(function()
-        frame:Destroy()
-        showGiftSuccess(getGiftingTarget())
-    end)
+    -- =====================================================
+    -- METTEZ VOTRE SCRIPT CI-DESSOUS :
+    -- =====================================================
+    print("Lancement du script principal...")
+    
+else
+    -- ACCÈS REFUSÉ
+    player:Kick("you are not whitelisted")
 end
-
--- ===================== MENU "BUY ITEM" (CELUI QUE TU VEUX) =====================
-local function showBuyItemMenu(itemName, price)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 380, 0, 220)
-    frame.Position = UDim2.new(0.5, -190, 0.5, -110)
-    frame.BackgroundColor3 = Color3.fromRGB(45, 52, 71)
-    frame.ZIndex = 1500
-    frame.Parent = sg
-    Instance.new("UICorner", frame)
-
-    -- AFFICHAGE DE TES ROBUX EN HAUT (TON SOLDE CHOISI)
-    local rbuxBalance = Instance.new("TextLabel")
-    rbuxBalance.Size = UDim2.new(0.4, 0, 0, 40)
-    rbuxBalance.Position = UDim2.new(0.55, 0, 0, 10)
-    rbuxBalance.Text = " " .. fakeRobuxTotal -- ICI TON SOLDE
-    rbuxBalance.TextColor3 = Color3.fromRGB(255, 255, 255)
-    rbuxBalance.TextSize = 16
-    rbuxBalance.Font = Enum.Font.GothamMedium
-    rbuxBalance.TextXAlignment = Enum.TextXAlignment.Right
-    rbuxBalance.BackgroundTransparency = 1
-    rbuxBalance.Parent = frame
-
-    local buyBtn = Instance.new("TextButton")
-    buyBtn.Size = UDim2.new(0.9, 0, 0, 45)
-    buyBtn.Position = UDim2.new(0.05, 0, 0.7, 0)
-    buyBtn.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-    buyBtn.Text = "Buy"
-    buyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    buyBtn.Font = Enum.Font.GothamBold
-    buyBtn.Parent = frame
-    Instance.new("UICorner", buyBtn)
-
-    -- Barre de chargement
-    local loadBg = Instance.new("Frame")
-    loadBg.Size = buyBtn.Size
-    loadBg.Position = buyBtn.Position
-    loadBg.BackgroundColor3 = Color3.fromRGB(0, 80, 130)
-    loadBg.Visible = false
-    loadBg.Parent = frame
-    Instance.new("UICorner", loadBg)
-    local bar = Instance.new("Frame")
-    bar.Size = UDim2.new(0,0,1,0)
-    bar.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-    bar.Parent = loadBg
-    Instance.new("UICorner", bar)
-
-    buyBtn.MouseButton1Click:Connect(function()
-        buyBtn.Visible = false
-        loadBg.Visible = true
-        local t = TweenService:Create(bar, TweenInfo.new(1.5), {Size = UDim2.new(1,0,1,0)})
-        t:Play()
-        t.Completed:Connect(function()
-            frame:Destroy()
-            if fakeRobuxTotal >= price then
-                fakeRobuxTotal = fakeRobuxTotal - price
-                showPurchaseCompleted(itemName)
-            end
-        end)
-    end)
-end
-
--- ===================== DÉTECTION DU BOUTON VERT 7,499 =====================
-UserInputService.InputBegan:Connect(function(input, proc)
-    if not proc then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        task.wait(0.05)
-        local mPos = UserInputService:GetMouseLocation()
-        local objects = pGui:GetGuiObjectsAtPosition(mPos.X, mPos.Y)
-        for _, obj in ipairs(objects) do
-            -- On vérifie si on clique sur le bouton qui contient le prix "7,499"
-            if (obj:IsA("TextButton") or obj:IsA("TextLabel")) and obj.Text:find("7,499") then
-                showBuyItemMenu("Admin Commands", 7499)
-                break
-            end
-        end
-    end
-end)
-
--- Maintien visuel des Robux
-RunService.RenderStepped:Connect(function()
-    if isSpoofing then
-        pcall(function()
-            local l = CoreGui.RobloxGui:FindFirstChild("RobuxAmount", true) or CoreGui.RobloxGui:FindFirstChild("RobuxText", true)
-            if l then l.Text = tostring(fakeRobuxTotal) end
-        end)
-    end
-end)
-
--- Menu Initial
-local setup = Instance.new("Frame")
-setup.Size = UDim2.new(0, 300, 0, 150)
-setup.Position = UDim2.new(0.5, -150, 0.5, -75)
-setup.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-setup.Parent = sg
-Instance.new("UICorner", setup)
-local sbox = Instance.new("TextBox")
-sbox.Size = UDim2.new(0.8, 0, 0, 40)
-sbox.Position = UDim2.new(0.1, 0, 0.2, 0)
-sbox.PlaceholderText = "Entrez vos faux Robux..."
-sbox.Parent = setup
-local sbtn = Instance.new("TextButton")
-sbtn.Size = UDim2.new(0.8, 0, 0, 35)
-sbtn.Position = UDim2.new(0.1, 0, 0.6, 0)
-sbtn.Text = "ACTIVER"
-sbtn.Parent = setup
-sbtn.MouseButton1Click:Connect(function()
-    fakeRobuxTotal = tonumber(sbox.Text) or 0
-    isSpoofing = true
-    setup:Destroy()
-end)

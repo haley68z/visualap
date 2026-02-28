@@ -1,4 +1,4 @@
--- Script complet mis à jour par Antigravity
+-- Script complet optimisé par Antigravity
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -44,38 +44,16 @@ Title1.Font = Enum.Font.GothamBold
 Title1.TextXAlignment = Enum.TextXAlignment.Left
 Title1.Parent = BuyFrame
 
-local RobuxContainer = Instance.new("Frame")
-RobuxContainer.Size = UDim2.new(0, 200, 0, 50)
-RobuxContainer.Position = UDim2.new(1, -220, 0, 0)
-RobuxContainer.BackgroundTransparency = 1
-RobuxContainer.Parent = BuyFrame
-
-local UIList = Instance.new("UIListLayout", RobuxContainer)
-UIList.FillDirection = Enum.FillDirection.Horizontal
-UIList.HorizontalAlignment = Enum.HorizontalAlignment.Right
-UIList.VerticalAlignment = Enum.VerticalAlignment.Center
-UIList.Padding = UDim.new(0, 5)
-
 local RobuxDisplay = Instance.new("TextLabel")
-RobuxDisplay.Name = "RobuxDisplay"
-RobuxDisplay.Size = UDim2.new(0, 0, 1, 0)
-RobuxDisplay.AutomaticSize = Enum.AutomaticSize.X
+RobuxDisplay.Size = UDim2.new(0, 150, 0, 50)
+RobuxDisplay.Position = UDim2.new(1, -190, 0, 0)
 RobuxDisplay.BackgroundTransparency = 1
-RobuxDisplay.Text = formatNumber(currentRobux)
+RobuxDisplay.Text = "R$ " .. formatNumber(currentRobux)
 RobuxDisplay.TextColor3 = Color3.fromRGB(200, 200, 200)
 RobuxDisplay.TextSize = 16
 RobuxDisplay.Font = Enum.Font.GothamMedium
-RobuxDisplay.LayoutOrder = 2
-RobuxDisplay.Parent = RobuxContainer
-
-local RobuxIcon = Instance.new("ImageLabel")
-RobuxIcon.Name = "RobuxIcon"
-RobuxIcon.Size = UDim2.new(0, 18, 0, 18)
-RobuxIcon.BackgroundTransparency = 1
-RobuxIcon.Image = "rbxassetid://6033788232"
-RobuxIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
-RobuxIcon.LayoutOrder = 1
-RobuxIcon.Parent = RobuxContainer
+RobuxDisplay.TextXAlignment = Enum.TextXAlignment.Right
+RobuxDisplay.Parent = BuyFrame
 
 local Close1 = Instance.new("TextButton")
 Close1.Size = UDim2.new(0, 30, 0, 30)
@@ -112,19 +90,11 @@ local PriceLabel = Instance.new("TextLabel")
 PriceLabel.Size = UDim2.new(1, -120, 0, 20)
 PriceLabel.Position = UDim2.new(0, 115, 0, 105)
 PriceLabel.BackgroundTransparency = 1
-PriceLabel.Text = formatNumber(itemPrice)
+PriceLabel.Text = "R$ " .. formatNumber(itemPrice)
 PriceLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 PriceLabel.TextSize = 16
 PriceLabel.Parent = BuyFrame
 PriceLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local PriceIcon = Instance.new("ImageLabel")
-PriceIcon.Size = UDim2.new(0, 16, 0, 16)
-PriceIcon.Position = UDim2.new(0, -22, 0.5, -8) -- À gauche du texte
-PriceIcon.BackgroundTransparency = 1
-PriceIcon.Image = "rbxassetid://6033788232"
-PriceIcon.ImageColor3 = Color3.new(1, 1, 1)
-PriceIcon.Parent = PriceLabel
 
 local BuyBtn = Instance.new("TextButton")
 BuyBtn.Size = UDim2.new(1, -40, 0, 45)
@@ -185,11 +155,12 @@ Stroke.Thickness = 3
 Stroke.Color = Color3.new(1,1,1)
 Instance.new("UICorner", CheckCircle).CornerRadius = UDim.new(1, 0)
 
-Instance.new("TextLabel", CheckCircle).Text = "✓"
-CheckCircle.TextLabel.Size = UDim2.new(1,0,1,0)
-CheckCircle.TextLabel.BackgroundTransparency = 1
-CheckCircle.TextLabel.TextColor3 = Color3.new(1,1,1)
-CheckCircle.TextLabel.TextSize = 35
+local Mark = Instance.new("TextLabel", CheckCircle)
+Mark.Text = "✓"
+Mark.Size = UDim2.new(1,0,1,0)
+Mark.BackgroundTransparency = 1
+Mark.TextColor3 = Color3.new(1,1,1)
+Mark.TextSize = 35
 
 local SuccessMsg = Instance.new("TextLabel")
 SuccessMsg.Size = UDim2.new(1, -40, 0, 40)
@@ -214,14 +185,14 @@ OkBtn.Parent = SuccessFrame
 Instance.new("UICorner", OkBtn).CornerRadius = UDim.new(0, 8)
 
 -----------------------------------------
--- NOTIFICATION VERTE (Sans contour)
+-- NOTIFICATION VERTE
 -----------------------------------------
 local GiftNotify = Instance.new("TextLabel")
 GiftNotify.Size = UDim2.new(0, 500, 0, 30)
 GiftNotify.Position = UDim2.new(0.5, -250, 1, -125) 
 GiftNotify.BackgroundTransparency = 1
 GiftNotify.Text = "You gifted Admin Commands to someone!"
-GiftNotify.TextColor3 = Color3.fromRGB(150, 255, 150) -- Vert pur
+GiftNotify.TextColor3 = Color3.fromRGB(150, 255, 150)
 GiftNotify.TextSize = 19
 GiftNotify.Font = Enum.Font.GothamBold
 GiftNotify.Visible = false
@@ -233,6 +204,12 @@ GiftNotify.Parent = ScreenGui
 local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
 local progressTween = TweenService:Create(ProgressBar, tweenInfo, {Size = UDim2.new(1, 0, 1, 0)})
 
+-- Gestion de la fin de l'animation (On connecte une seule fois)
+progressTween.Completed:Connect(function()
+	canClick = true
+	BuyBtn.AutoButtonColor = true
+end)
+
 local function openMenu()
 	if not ScreenGui.Enabled then
 		ScreenGui.Enabled = true
@@ -241,28 +218,26 @@ local function openMenu()
 		ProgressBar.Size = UDim2.new(0, 0, 1, 0)
 		canClick = false
 		BuyBtn.AutoButtonColor = false
-		RobuxDisplay.Text = formatNumber(currentRobux)
+		RobuxDisplay.Text = "R$ " .. formatNumber(currentRobux)
 		
 		progressTween:Play()
-		progressTween.Completed:Connect(function()
-			canClick = true
-			BuyBtn.AutoButtonColor = true
-		end)
 	else
 		ScreenGui.Enabled = false
+		progressTween:Cancel()
 	end
 end
 
-BuyBtn.MouseButton1Click:Connect(function()
+-- On utilise MouseButton1Down pour une réponse INSTANTANÉE
+BuyBtn.MouseButton1Down:Connect(function()
 	if canClick then
 		-- Déduction
 		currentRobux = currentRobux - itemPrice
-		RobuxDisplay.Text = formatNumber(currentRobux)
+		RobuxDisplay.Text = "R$ " .. formatNumber(currentRobux)
 		
 		BuyFrame.Visible = false
 		SuccessFrame.Visible = true
 		
-		-- Notification Verte simple
+		-- Notification
 		GiftNotify.Visible = true
 		task.delay(5, function()
 			GiftNotify.Visible = false
@@ -270,8 +245,8 @@ BuyBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
-OkBtn.MouseButton1Click:Connect(function() ScreenGui.Enabled = false end)
-Close1.MouseButton1Click:Connect(function() ScreenGui.Enabled = false end)
+OkBtn.MouseButton1Down:Connect(function() ScreenGui.Enabled = false end)
+Close1.MouseButton1Down:Connect(function() ScreenGui.Enabled = false end)
 
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then return end

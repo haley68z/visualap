@@ -16,6 +16,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "PurchaseSystem"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Enabled = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global -- Assure un bon contrôle des plans
 ScreenGui.Parent = pGui
 
 local function formatNumber(n)
@@ -64,13 +65,14 @@ Close1.TextColor3 = Color3.fromRGB(255, 255, 255)
 Close1.TextSize = 22
 Close1.Parent = BuyFrame
 
--- Contenu Item (Image AP remplacée)
+-- Contenu Item (Image AP au premier plan)
 local ItemIcon = Instance.new("ImageLabel")
 ItemIcon.Size = UDim2.new(0, 80, 0, 80)
 ItemIcon.Position = UDim2.new(0, 20, 0, 70)
 ItemIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-ItemIcon.Image = "rbxassetid://13540201103" -- ID du logo AP Argenté
+ItemIcon.Image = "rbxassetid://13540201103" 
 ItemIcon.ScaleType = Enum.ScaleType.Fit
+ItemIcon.ZIndex = 10 -- MIS EN PREMIER PLAN
 ItemIcon.Parent = BuyFrame
 Instance.new("UICorner", ItemIcon).CornerRadius = UDim.new(0, 8)
 
@@ -154,11 +156,12 @@ Stroke.Thickness = 3
 Stroke.Color = Color3.new(1,1,1)
 Instance.new("UICorner", CheckCircle).CornerRadius = UDim.new(1, 0)
 
-Instance.new("TextLabel", CheckCircle).Text = "✓"
-CheckCircle.TextLabel.Size = UDim2.new(1,0,1,0)
-CheckCircle.TextLabel.BackgroundTransparency = 1
-CheckCircle.TextLabel.TextColor3 = Color3.new(1,1,1)
-CheckCircle.TextLabel.TextSize = 35
+local MarkLabel = Instance.new("TextLabel", CheckCircle)
+MarkLabel.Text = "✓"
+MarkLabel.Size = UDim2.new(1,0,1,0)
+MarkLabel.BackgroundTransparency = 1
+MarkLabel.TextColor3 = Color3.new(1,1,1)
+MarkLabel.TextSize = 35
 
 local SuccessMsg = Instance.new("TextLabel")
 SuccessMsg.Size = UDim2.new(1, -40, 0, 40)

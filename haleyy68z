@@ -1,4 +1,4 @@
--- Script complet par Antigravity
+-- Script complet mis à jour par Antigravity
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -6,6 +6,9 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local pGui = player:WaitForChild("PlayerGui")
 
+-- Variables de données
+local currentRobux = 430254 -- Solde initial demandé
+local itemPrice = 7499
 local canClick = false
 
 -- SCREEN GUI PRINCIPAL
@@ -14,6 +17,11 @@ ScreenGui.Name = "PurchaseSystem"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Enabled = false
 ScreenGui.Parent = pGui
+
+-- Fonction pour formater les nombres (ex: 430,254)
+local function formatNumber(n)
+	return tostring(n):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+end
 
 -----------------------------------------
 -- MENU 1 : BUY ITEM
@@ -24,15 +32,12 @@ BuyFrame.Size = UDim2.new(0, 450, 0, 250)
 BuyFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
 BuyFrame.BackgroundColor3 = Color3.fromRGB(24, 25, 30)
 BuyFrame.BorderSizePixel = 0
-BuyFrame.Visible = true
 BuyFrame.Parent = ScreenGui
+Instance.new("UICorner", BuyFrame).CornerRadius = UDim.new(0, 12)
 
-local Corner1 = Instance.new("UICorner")
-Corner1.CornerRadius = UDim.new(0, 12)
-Corner1.Parent = BuyFrame
-
+-- Header elements
 local Title1 = Instance.new("TextLabel")
-Title1.Size = UDim2.new(1, -80, 0, 50)
+Title1.Size = UDim2.new(0, 100, 0, 50)
 Title1.Position = UDim2.new(0, 20, 0, 0)
 Title1.BackgroundTransparency = 1
 Title1.Text = "Buy item"
@@ -41,6 +46,18 @@ Title1.TextSize = 20
 Title1.Font = Enum.Font.GothamBold
 Title1.TextXAlignment = Enum.TextXAlignment.Left
 Title1.Parent = BuyFrame
+
+-- Affichage Robux (à gauche du X)
+local RobuxDisplay = Instance.new("TextLabel")
+RobuxDisplay.Size = UDim2.new(0, 150, 0, 50)
+RobuxDisplay.Position = UDim2.new(1, -190, 0, 0)
+RobuxDisplay.BackgroundTransparency = 1
+RobuxDisplay.Text = "R$ " .. formatNumber(currentRobux)
+RobuxDisplay.TextColor3 = Color3.fromRGB(200, 200, 200)
+RobuxDisplay.TextSize = 16
+RobuxDisplay.Font = Enum.Font.GothamMedium
+RobuxDisplay.TextXAlignment = Enum.TextXAlignment.Right
+RobuxDisplay.Parent = BuyFrame
 
 local Close1 = Instance.new("TextButton")
 Close1.Size = UDim2.new(0, 30, 0, 30)
@@ -74,15 +91,15 @@ ItemName.Font = Enum.Font.GothamMedium
 ItemName.TextXAlignment = Enum.TextXAlignment.Left
 ItemName.Parent = BuyFrame
 
-local Price = Instance.new("TextLabel")
-Price.Size = UDim2.new(1, -120, 0, 20)
-Price.Position = UDim2.new(0, 115, 0, 105)
-Price.BackgroundTransparency = 1
-Price.Text = "R$ 7,499"
-Price.TextColor3 = Color3.fromRGB(255, 255, 255)
-Price.TextSize = 16
-Price.Parent = BuyFrame
-Price.TextXAlignment = Enum.TextXAlignment.Left
+local PriceLabel = Instance.new("TextLabel")
+PriceLabel.Size = UDim2.new(1, -120, 0, 20)
+PriceLabel.Position = UDim2.new(0, 115, 0, 105)
+PriceLabel.BackgroundTransparency = 1
+PriceLabel.Text = "R$ " .. formatNumber(itemPrice)
+PriceLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+PriceLabel.TextSize = 16
+PriceLabel.Parent = BuyFrame
+PriceLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Bouton Buy + Progress
 local BuyBtn = Instance.new("TextButton")
@@ -121,7 +138,7 @@ SuccessFrame.Size = UDim2.new(0, 450, 0, 250)
 SuccessFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
 SuccessFrame.BackgroundColor3 = Color3.fromRGB(24, 25, 30)
 SuccessFrame.BorderSizePixel = 0
-SuccessFrame.Visible = false -- Masqué par défaut
+SuccessFrame.Visible = false
 SuccessFrame.Parent = ScreenGui
 Instance.new("UICorner", SuccessFrame).CornerRadius = UDim.new(0, 12)
 
@@ -132,33 +149,25 @@ Title2.BackgroundTransparency = 1
 Title2.Text = "Purchase completed"
 Title2.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title2.TextSize = 20
-Title1.Font = Enum.Font.GothamBold
+Title2.Font = Enum.Font.GothamBold
 Title2.TextXAlignment = Enum.TextXAlignment.Left
 Title2.Parent = SuccessFrame
 
--- Icône Checkmark
 local CheckCircle = Instance.new("Frame")
 CheckCircle.Size = UDim2.new(0, 60, 0, 60)
 CheckCircle.Position = UDim2.new(0.5, -30, 0, 70)
-CheckCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-CheckCircle.BackgroundTransparency = 0.9
+CheckCircle.BackgroundTransparency = 1
 CheckCircle.Parent = SuccessFrame
-local CCC = Instance.new("UICorner", CheckCircle)
-CCC.CornerRadius = UDim.new(1, 0)
+local Stroke = Instance.new("UIStroke", CheckCircle)
+Stroke.Thickness = 3
+Stroke.Color = Color3.new(1,1,1)
+Instance.new("UICorner", CheckCircle).CornerRadius = UDim.new(1, 0)
 
--- Cercle blanc
-local Border = Instance.new("UIStroke")
-Border.Thickness = 3
-Border.Color = Color3.fromRGB(255, 255, 255)
-Border.Parent = CheckCircle
-
-local CheckMark = Instance.new("TextLabel")
-CheckMark.Size = UDim2.new(1, 0, 1, 0)
-CheckMark.BackgroundTransparency = 1
-CheckMark.Text = "✓"
-CheckMark.TextColor3 = Color3.fromRGB(255, 255, 255)
-CheckMark.TextSize = 35
-CheckMark.Parent = CheckCircle
+Instance.new("TextLabel", CheckCircle).Text = "✓"
+CheckCircle.TextLabel.Size = UDim2.new(1,0,1,0)
+CheckCircle.TextLabel.BackgroundTransparency = 1
+CheckCircle.TextLabel.TextColor3 = Color3.new(1,1,1)
+CheckCircle.TextLabel.TextSize = 35
 
 local SuccessMsg = Instance.new("TextLabel")
 SuccessMsg.Size = UDim2.new(1, -40, 0, 40)
@@ -174,7 +183,7 @@ SuccessMsg.Parent = SuccessFrame
 local OkBtn = Instance.new("TextButton")
 OkBtn.Size = UDim2.new(1, -40, 0, 45)
 OkBtn.Position = UDim2.new(0, 20, 1, -65)
-OkBtn.BackgroundColor3 = Color3.fromRGB(50, 100, 255) -- Bleu vif
+OkBtn.BackgroundColor3 = Color3.fromRGB(50, 100, 255)
 OkBtn.Text = "OK"
 OkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 OkBtn.TextSize = 18
@@ -196,6 +205,7 @@ local function openMenu()
 		ProgressBar.Size = UDim2.new(0, 0, 1, 0)
 		canClick = false
 		BuyBtn.AutoButtonColor = false
+		RobuxDisplay.Text = "R$ " .. formatNumber(currentRobux) -- Mise à jour de l'affichage
 		
 		progressTween:Play()
 		progressTween.Completed:Connect(function()
@@ -210,6 +220,10 @@ end
 -- Clic sur BUY
 BuyBtn.MouseButton1Click:Connect(function()
 	if canClick then
+		-- Déduction des Robux
+		currentRobux = currentRobux - itemPrice
+		RobuxDisplay.Text = "R$ " .. formatNumber(currentRobux)
+		
 		BuyFrame.Visible = false
 		SuccessFrame.Visible = true
 	end
@@ -220,7 +234,6 @@ OkBtn.MouseButton1Click:Connect(function()
 	ScreenGui.Enabled = false
 end)
 
--- Fermeture via X
 Close1.MouseButton1Click:Connect(function() ScreenGui.Enabled = false end)
 
 -- Keybind P

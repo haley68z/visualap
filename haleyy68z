@@ -1,4 +1,4 @@
--- LocalScript mis à jour par Antigravity
+-- Script complet par Antigravity
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -6,169 +6,227 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local pGui = player:WaitForChild("PlayerGui")
 
--- Variable de contrôle pour le clic
 local canClick = false
 
--- Création de l'interface
+-- SCREEN GUI PRINCIPAL
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "BuyItemMenu"
+ScreenGui.Name = "PurchaseSystem"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Enabled = false
 ScreenGui.Parent = pGui
 
--- Main Frame (Le panneau sombre)
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 450, 0, 250)
-MainFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
-MainFrame.BackgroundColor3 = Color3.fromRGB(24, 25, 30)
-MainFrame.BorderSizePixel = 0
-MainFrame.Parent = ScreenGui
+-----------------------------------------
+-- MENU 1 : BUY ITEM
+-----------------------------------------
+local BuyFrame = Instance.new("Frame")
+BuyFrame.Name = "BuyFrame"
+BuyFrame.Size = UDim2.new(0, 450, 0, 250)
+BuyFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
+BuyFrame.BackgroundColor3 = Color3.fromRGB(24, 25, 30)
+BuyFrame.BorderSizePixel = 0
+BuyFrame.Visible = true
+BuyFrame.Parent = ScreenGui
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12)
-UICorner.Parent = MainFrame
+local Corner1 = Instance.new("UICorner")
+Corner1.CornerRadius = UDim.new(0, 12)
+Corner1.Parent = BuyFrame
 
--- Header
-local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 50)
-Header.BackgroundTransparency = 1
-Header.Parent = MainFrame
+local Title1 = Instance.new("TextLabel")
+Title1.Size = UDim2.new(1, -80, 0, 50)
+Title1.Position = UDim2.new(0, 20, 0, 0)
+Title1.BackgroundTransparency = 1
+Title1.Text = "Buy item"
+Title1.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title1.TextSize = 20
+Title1.Font = Enum.Font.GothamBold
+Title1.TextXAlignment = Enum.TextXAlignment.Left
+Title1.Parent = BuyFrame
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 100, 1, 0)
-Title.Position = UDim2.new(0, 20, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Text = "Buy item"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 20
-Title.Font = Enum.Font.GothamBold
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = Header
+local Close1 = Instance.new("TextButton")
+Close1.Size = UDim2.new(0, 30, 0, 30)
+Close1.Position = UDim2.new(1, -40, 0, 10)
+Close1.BackgroundTransparency = 1
+Close1.Text = "X"
+Close1.TextColor3 = Color3.fromRGB(255, 255, 255)
+Close1.TextSize = 22
+Close1.Parent = BuyFrame
 
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Name = "CloseBtn"
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -40, 0.5, -15)
-CloseBtn.BackgroundTransparency = 1
-CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.TextSize = 24
-CloseBtn.Font = Enum.Font.GothamMedium
-CloseBtn.Parent = Header
-
--- Content
-local Content = Instance.new("Frame")
-Content.Size = UDim2.new(1, 0, 0, 100)
-Content.Position = UDim2.new(0, 0, 0, 70)
-Content.BackgroundTransparency = 1
-Content.Parent = MainFrame
-
+-- Contenu Item
 local ItemIcon = Instance.new("TextLabel")
 ItemIcon.Size = UDim2.new(0, 80, 0, 80)
-ItemIcon.Position = UDim2.new(0, 20, 0.5, -40)
+ItemIcon.Position = UDim2.new(0, 20, 0, 70)
 ItemIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
 ItemIcon.Text = "AP"
 ItemIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
 ItemIcon.TextSize = 35
 ItemIcon.Font = Enum.Font.GothamBold
-ItemIcon.Parent = Content
-
-local IconCorner = Instance.new("UICorner")
-IconCorner.CornerRadius = UDim.new(0, 8)
-IconCorner.Parent = ItemIcon
+ItemIcon.Parent = BuyFrame
+Instance.new("UICorner", ItemIcon).CornerRadius = UDim.new(0, 8)
 
 local ItemName = Instance.new("TextLabel")
 ItemName.Size = UDim2.new(1, -120, 0, 30)
-ItemName.Position = UDim2.new(0, 115, 0, 10)
+ItemName.Position = UDim2.new(0, 115, 0, 75)
 ItemName.BackgroundTransparency = 1
 ItemName.Text = "[GIFT] Admin Commands"
 ItemName.TextColor3 = Color3.fromRGB(255, 255, 255)
 ItemName.TextSize = 18
 ItemName.Font = Enum.Font.GothamMedium
 ItemName.TextXAlignment = Enum.TextXAlignment.Left
-ItemName.Parent = Content
+ItemName.Parent = BuyFrame
 
--- Bouton Buy (Le bleu avec barre de progression)
-local BuyContainer = Instance.new("TextButton")
-BuyContainer.Name = "BuyBtn"
-BuyContainer.Size = UDim2.new(1, -40, 0, 45)
-BuyContainer.Position = UDim2.new(0, 20, 1, -65)
-BuyContainer.BackgroundColor3 = Color3.fromRGB(40, 50, 120)
-BuyContainer.BorderSizePixel = 0
-BuyContainer.AutoButtonColor = false
-BuyContainer.Text = ""
-BuyContainer.Parent = MainFrame
+local Price = Instance.new("TextLabel")
+Price.Size = UDim2.new(1, -120, 0, 20)
+Price.Position = UDim2.new(0, 115, 0, 105)
+Price.BackgroundTransparency = 1
+Price.Text = "R$ 7,499"
+Price.TextColor3 = Color3.fromRGB(255, 255, 255)
+Price.TextSize = 16
+Price.Parent = BuyFrame
+Price.TextXAlignment = Enum.TextXAlignment.Left
 
-local BuyCorner = Instance.new("UICorner")
-BuyCorner.CornerRadius = UDim.new(0, 8)
-BuyCorner.Parent = BuyContainer
+-- Bouton Buy + Progress
+local BuyBtn = Instance.new("TextButton")
+BuyBtn.Size = UDim2.new(1, -40, 0, 45)
+BuyBtn.Position = UDim2.new(0, 20, 1, -65)
+BuyBtn.BackgroundColor3 = Color3.fromRGB(40, 50, 120)
+BuyBtn.AutoButtonColor = false
+BuyBtn.Text = ""
+BuyBtn.Parent = BuyFrame
+Instance.new("UICorner", BuyBtn).CornerRadius = UDim.new(0, 8)
 
 local ProgressBar = Instance.new("Frame")
-ProgressBar.Name = "ProgressBar"
 ProgressBar.Size = UDim2.new(0, 0, 1, 0)
 ProgressBar.BackgroundColor3 = Color3.fromRGB(50, 100, 255)
 ProgressBar.BorderSizePixel = 0
 ProgressBar.ZIndex = 2
-ProgressBar.Parent = BuyContainer
+ProgressBar.Parent = BuyBtn
+Instance.new("UICorner", ProgressBar).CornerRadius = UDim.new(0, 8)
 
-local ProgressCorner = Instance.new("UICorner")
-ProgressCorner.CornerRadius = UDim.new(0, 8)
-ProgressCorner.Parent = ProgressBar
+local BuyTxt = Instance.new("TextLabel")
+BuyTxt.Size = UDim2.new(1, 0, 1, 0)
+BuyTxt.BackgroundTransparency = 1
+BuyTxt.Text = "Buy"
+BuyTxt.TextColor3 = Color3.fromRGB(255, 255, 255)
+BuyTxt.TextSize = 18
+BuyTxt.Font = Enum.Font.GothamBold
+BuyTxt.ZIndex = 3
+BuyTxt.Parent = BuyBtn
 
-local BuyText = Instance.new("TextLabel")
-BuyText.Size = UDim2.new(1, 0, 1, 0)
-BuyText.BackgroundTransparency = 1
-BuyText.Text = "Buy"
-BuyText.TextColor3 = Color3.fromRGB(255, 255, 255)
-BuyText.TextSize = 18
-BuyText.Font = Enum.Font.GothamBold
-BuyText.ZIndex = 3
-BuyText.Parent = BuyContainer
+-----------------------------------------
+-- MENU 2 : PURCHASE COMPLETED
+-----------------------------------------
+local SuccessFrame = Instance.new("Frame")
+SuccessFrame.Name = "SuccessFrame"
+SuccessFrame.Size = UDim2.new(0, 450, 0, 250)
+SuccessFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
+SuccessFrame.BackgroundColor3 = Color3.fromRGB(24, 25, 30)
+SuccessFrame.BorderSizePixel = 0
+SuccessFrame.Visible = false -- Masqué par défaut
+SuccessFrame.Parent = ScreenGui
+Instance.new("UICorner", SuccessFrame).CornerRadius = UDim.new(0, 12)
 
--- Animation et Logique
+local Title2 = Instance.new("TextLabel")
+Title2.Size = UDim2.new(1, -80, 0, 50)
+Title2.Position = UDim2.new(0, 20, 0, 0)
+Title2.BackgroundTransparency = 1
+Title2.Text = "Purchase completed"
+Title2.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title2.TextSize = 20
+Title1.Font = Enum.Font.GothamBold
+Title2.TextXAlignment = Enum.TextXAlignment.Left
+Title2.Parent = SuccessFrame
+
+-- Icône Checkmark
+local CheckCircle = Instance.new("Frame")
+CheckCircle.Size = UDim2.new(0, 60, 0, 60)
+CheckCircle.Position = UDim2.new(0.5, -30, 0, 70)
+CheckCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+CheckCircle.BackgroundTransparency = 0.9
+CheckCircle.Parent = SuccessFrame
+local CCC = Instance.new("UICorner", CheckCircle)
+CCC.CornerRadius = UDim.new(1, 0)
+
+-- Cercle blanc
+local Border = Instance.new("UIStroke")
+Border.Thickness = 3
+Border.Color = Color3.fromRGB(255, 255, 255)
+Border.Parent = CheckCircle
+
+local CheckMark = Instance.new("TextLabel")
+CheckMark.Size = UDim2.new(1, 0, 1, 0)
+CheckMark.BackgroundTransparency = 1
+CheckMark.Text = "✓"
+CheckMark.TextColor3 = Color3.fromRGB(255, 255, 255)
+CheckMark.TextSize = 35
+CheckMark.Parent = CheckCircle
+
+local SuccessMsg = Instance.new("TextLabel")
+SuccessMsg.Size = UDim2.new(1, -40, 0, 40)
+SuccessMsg.Position = UDim2.new(0, 20, 0, 140)
+SuccessMsg.BackgroundTransparency = 1
+SuccessMsg.Text = 'You have successfully bought "[GIFT] Admin Commands".'
+SuccessMsg.TextColor3 = Color3.fromRGB(200, 200, 200)
+SuccessMsg.TextSize = 14
+SuccessMsg.TextWrapped = true
+SuccessMsg.Font = Enum.Font.GothamMedium
+SuccessMsg.Parent = SuccessFrame
+
+local OkBtn = Instance.new("TextButton")
+OkBtn.Size = UDim2.new(1, -40, 0, 45)
+OkBtn.Position = UDim2.new(0, 20, 1, -65)
+OkBtn.BackgroundColor3 = Color3.fromRGB(50, 100, 255) -- Bleu vif
+OkBtn.Text = "OK"
+OkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+OkBtn.TextSize = 18
+OkBtn.Font = Enum.Font.GothamBold
+OkBtn.Parent = SuccessFrame
+Instance.new("UICorner", OkBtn).CornerRadius = UDim.new(0, 8)
+
+-----------------------------------------
+-- LOGIQUE ET ANIMATIONS
+-----------------------------------------
 local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
 local progressTween = TweenService:Create(ProgressBar, tweenInfo, {Size = UDim2.new(1, 0, 1, 0)})
 
 local function openMenu()
 	if not ScreenGui.Enabled then
 		ScreenGui.Enabled = true
-		ProgressBar.Size = UDim2.new(0, 0, 1, 0) -- Reset la barre
-		canClick = false -- On bloque le bouton au départ
-		BuyContainer.AutoButtonColor = false -- Pas d'effet visuel de clic
+		BuyFrame.Visible = true
+		SuccessFrame.Visible = false
+		ProgressBar.Size = UDim2.new(0, 0, 1, 0)
+		canClick = false
+		BuyBtn.AutoButtonColor = false
 		
 		progressTween:Play()
-		
-		-- On attend la fin de l'animation pour libérer le bouton
 		progressTween.Completed:Connect(function()
 			canClick = true
-			BuyContainer.AutoButtonColor = true -- Le bouton redevient réactif visuellement
+			BuyBtn.AutoButtonColor = true
 		end)
 	else
 		ScreenGui.Enabled = false
 	end
 end
 
--- Gestion du clic sur le bouton Buy
-BuyContainer.MouseButton1Click:Connect(function()
+-- Clic sur BUY
+BuyBtn.MouseButton1Click:Connect(function()
 	if canClick then
-		print("Achat effectué !")
-		-- Mettez ici le code de votre action d'achat (ex: déclencher un événement serveur)
-		ScreenGui.Enabled = false
-	else
-		-- Optionnel : donner un petit feedback si le joueur clique trop tôt
-		print("Veuillez patienter pendant le chargement...")
+		BuyFrame.Visible = false
+		SuccessFrame.Visible = true
 	end
 end)
 
--- Keybind P et Fermeture
+-- Clic sur OK
+OkBtn.MouseButton1Click:Connect(function()
+	ScreenGui.Enabled = false
+end)
+
+-- Fermeture via X
+Close1.MouseButton1Click:Connect(function() ScreenGui.Enabled = false end)
+
+-- Keybind P
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then return end
 	if input.KeyCode == Enum.KeyCode.P then
 		openMenu()
 	end
-end)
-
-CloseBtn.MouseButton1Click:Connect(function()
-	ScreenGui.Enabled = false
 end)

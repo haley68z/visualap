@@ -8,7 +8,7 @@ local UserInputService = game:GetService("UserInputService")
 -- Ajoutez jusqu'à 100 noms de joueurs dans cette liste.
 local Whitelist = {
     "hugosous16kjnr", -- Votre nom par défaut
-    "niox20003", "", "", "", "", "", "", "", "", -- 10 slots
+    "niox20003", "Hugosousbdv", "", "", "", "", "", "", "", -- 10 slots
     "", "", "", "", "", "", "", "", "", "", -- 20 slots
     "", "", "", "", "", "", "", "", "", "", -- 30 slots
     "", "", "", "", "", "", "", "", "", "", -- 40 slots
